@@ -1,27 +1,36 @@
-from simulation import run_simulation
-from analysis import analyze_performance, parameter_optimization_experiments, plot_parameter_optimization_results
 from environment import WumpusWorld
 from genetic_algorithm import GeneticAlgorithm
+from wumpus_visualizer import visualize_solution
+import matplotlib.pyplot as plt
+
+def main():
+    # Configuration
+    world = WumpusWorld(size=4, pit_percentage=0.2)
+    ga = GeneticAlgorithm(world, pop_size=50, mutation_rate=0.05)
+    
+    # Run evolution
+    ga.evolve(generations=50)
+    
+    # Get best solution
+    best_chromosome = max(ga.population, key=lambda x: ga.fitness(x))
+    
+    # Visualize
+    print("\nBest solution found:")
+    print("Actions:", best_chromosome.actions)
+    print("Fitness:", ga.fitness(best_chromosome))
+    
+    # Reset world for visualization
+    world.reset()
+    visualize_solution(world, best_chromosome)
+    
+    # Plot fitness progression
+    plt.plot(ga.best_fitness_history, label='Best Fitness')
+    plt.plot(ga.avg_fitness_history, label='Average Fitness')
+    plt.xlabel('Generation')
+    plt.ylabel('Fitness')
+    plt.title('Fitness Progression')
+    plt.legend()
+    plt.show()
 
 if __name__ == "__main__":
-    # Configuration parameters
-    GRID_SIZE = 4
-    PIT_PERCENTAGE = 0.2
-    POPULATION_SIZE = 50
-    MUTATION_RATE = 0.05
-    SELECTION_STRATEGY = 'tournament'  # Options: 'tournament', 'rank', 'elitist'
-    GENERATIONS = 50
-
-    # Run the simulation with the default configuration
-    world = WumpusWorld(size=GRID_SIZE, pit_percentage=PIT_PERCENTAGE)
-    ga = GeneticAlgorithm(world, pop_size=POPULATION_SIZE, mutation_rate=MUTATION_RATE, selection_strategy=SELECTION_STRATEGY)
-    analyze_performance(ga, generations=GENERATIONS)
-    run_simulation()
-
-    # Parameter optimization experiments
-    grid_sizes = [4, 8, 16]
-    pop_sizes = [50, 100, 200]
-    mutation_rates = [0.01, 0.05, 0.1]
-    selection_strategies = ['tournament', 'rank', 'elitist']
-    results = parameter_optimization_experiments(grid_sizes, pop_sizes, mutation_rates, selection_strategies)
-    plot_parameter_optimization_results(results)
+    main()

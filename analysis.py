@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from environment import WumpusWorld
 from genetic_algorithm import GeneticAlgorithm
-from visualization import visualize_agent_path  # Import the visualization function
+from wumpus_visualizer import visualize_agent_path  # Import the visualization function
 
 def plot_fitness(fitness_scores):
     plt.plot(fitness_scores)
