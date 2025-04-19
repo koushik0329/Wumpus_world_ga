@@ -52,7 +52,50 @@ def analyze_performance(ga, generations=50):
     plot_statistical_summaries(summaries)
 
     best_chromosome = max(ga.population, key=ga.fitness)
-    visualize_agent_path(ga.env, best_chromosome.actions)
+    visualize_agent_path(ga.env)
+
+    # Print detailed output
+    print(f"Grid Size: {ga.env.size}x{ga.env.size}")
+    print(f"Pits: {len(ga.env.pits)}")
+    print(f"Wumpus: {ga.env.wumpus_pos}")
+    print(f"Gold: {ga.env.gold_pos}")
+    print(f"Agent Start: {ga.env.agent_pos}")
+    print("\nBest Evolved Chromosome:")
+    print(best_chromosome.actions)
+    print("\nOutcome:")
+
+    # Simulate the best chromosome to determine the outcome
+    ga.env.reset()
+    gold_collected = False
+    wumpus_killed = False
+    agent_survived = True
+
+    for action in best_chromosome.actions:
+        result = ga.env.move_agent(action)
+        if result == 'gold':
+            gold_collected = True
+        if 'W' in ga.env.grid[ga.env.agent_pos[0]][ga.env.agent_pos[1]]:
+            wumpus_killed = True
+        if 'P' in ga.env.grid[ga.env.agent_pos[0]][ga.env.agent_pos[1]]:
+            agent_survived = False
+            break
+
+    if gold_collected:
+        print("✔️ Gold Collected")
+    else:
+        print("❌ Gold Not Collected")
+
+    if wumpus_killed:
+        print("✔️ Wumpus Killed")
+    else:
+        print("❌ Wumpus Not Killed")
+
+    if agent_survived:
+        print("✔️ Agent Survived")
+    else:
+        print("❌ Agent Did Not Survive")
+
+    print(f"🎯 Total Fitness: {ga.fitness(best_chromosome)}")
 
 def parameter_optimization_experiments(grid_sizes, pop_sizes, mutation_rates, selection_strategies):
     results = []

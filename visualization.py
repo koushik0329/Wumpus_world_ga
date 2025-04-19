@@ -58,13 +58,7 @@ def draw_grid(world):
             if (x, y) in world.stenches:
                 screen.blit(stench_img, (y * CELL_SIZE + 25, x * CELL_SIZE + 50))
 
-def visualize_agent_path(env, actions):
-    path = []
-    env.reset()
-    for action in actions:
-        env.move_agent(action)
-        path.append(env.agent_pos)
-
+def visualize_agent_path(env):
     running = True
     while running:
         screen.fill(WHITE)
@@ -73,6 +67,9 @@ def visualize_agent_path(env, actions):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+
+        if env.move_agent_logic():
+            running = False
 
         pygame.display.flip()
         clock.tick(FPS)
