@@ -1,7 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from environment import WumpusWorld  # Import the WumpusWorld class
-from genetic_algorithm import GeneticAlgorithm  # Import the GeneticAlgorithm class
+from environment import WumpusWorld
+from genetic_algorithm import GeneticAlgorithm
+from visualization import visualize_agent_path  # Import the visualization function
 
 def plot_fitness(fitness_scores):
     plt.plot(fitness_scores)
@@ -43,32 +44,6 @@ def plot_statistical_summaries(summaries):
     plt.legend()
 
     plt.tight_layout()
-    plt.show()
-
-def visualize_agent_path(env, actions):
-    path = []
-    env.reset()
-    for action in actions:
-        env.move_agent(action)
-        path.append(env.agent_pos)
-
-    plt.figure(figsize=(6, 6))
-    for i in range(env.size):
-        for j in range(env.size):
-            cell = env.grid[i][j]
-            if 'P' in cell:
-                plt.plot(j, i, 'rs')  # Pit
-            if 'W' in cell:
-                plt.plot(j, i, 'ko')  # Wumpus
-            if 'G' in cell:
-                plt.plot(j, i, 'y*')  # Gold
-
-    path_x, path_y = zip(*path)
-    plt.plot(path_x, path_y, 'b-o')  # Agent path
-    plt.xlim(-1, env.size)
-    plt.ylim(-1, env.size)
-    plt.gca().invert_yaxis()
-    plt.title('Agent Path in Wumpus World')
     plt.show()
 
 def analyze_performance(ga, generations=50):

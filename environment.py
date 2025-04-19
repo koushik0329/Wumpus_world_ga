@@ -12,7 +12,13 @@ class WumpusWorld:
         self.agent_pos = (0, 0)
         self.agent_dir = 'right'  # Agent starts facing right
         self.arrow_count = 1
+        self.gold_pos = None
+        self.wumpus_pos = None
+        self.pits = []
+        self.breezes = []
+        self.stenches = []
         self.place_elements()
+        self.generate_percepts()
 
     def place_elements(self):
         empty_cells = [(i, j) for i in range(self.size) for j in range(self.size) if (i, j) != (0, 0)]
@@ -22,14 +28,37 @@ class WumpusWorld:
         for _ in range(self.pit_count):
             x, y = empty_cells.pop()
             self.grid[x][y] += 'P'
+            self.pits.append((x, y))
 
         # Place Wumpus
         x, y = empty_cells.pop()
         self.grid[x][y] += 'W'
+        self.wumpus_pos = (x, y)
 
         # Place Gold
         x, y = empty_cells.pop()
         self.grid[x][y] += 'G'
+        self.gold_pos = (x, y)
+
+    def generate_percepts(self):
+        self.breezes = []
+        self.stenches = []
+
+        for pit in self.pits:
+            for neighbor in self.neighbors(*pit):
+                if neighbor not in self.pits:
+                    self.breezes.append(neighbor)
+
+        for neighbor in self.neighbors(*self.wumpus_pos):
+            if neighbor != self.wumpus_pos:
+                self.stenches.append(neighbor)
+
+    def neighbors(self, x, y):
+        return [
+            (x + dx, y + dy)
+            for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]
+            if 0 <= x + dx < self.size and 0 <= y + dy < self.size
+        ]
 
     def get_percepts(self, x, y):
         percepts = []
