@@ -2,132 +2,80 @@ import matplotlib.pyplot as plt
 import numpy as np
 from environment import WumpusWorld
 from genetic_algorithm import GeneticAlgorithm
-from visualization import visualize_agent_path  # Import the visualization function
+from visualize import visualize_agent_path  # Import the visualization function
 
 def plot_fitness(fitness_scores):
+    """Plot fitness scores over generations.
+    
+    Args:
+        fitness_scores: A list of fitness scores.
+    """
+    plt.figure(figsize=(10, 6))
     plt.plot(fitness_scores)
     plt.xlabel('Generation')
     plt.ylabel('Fitness Score')
     plt.title('Fitness Score Over Generations')
+    plt.grid(True)
+    plt.savefig('fitness_scores.png')
     plt.show()
 
 def plot_success_rate(success_rates):
+    """Plot success rates over generations.
+    
+    Args:
+        success_rates: A list of success rates.
+    """
+    plt.figure(figsize=(10, 6))
     plt.plot(success_rates)
     plt.xlabel('Generation')
     plt.ylabel('Success Rate')
     plt.title('Success Rate Over Generations')
+    plt.grid(True)
+    plt.savefig('success_rates.png')
     plt.show()
 
 def plot_statistical_summaries(summaries):
+    """Plot statistical summaries of the evolution process.
+    
+    Args:
+        summaries: A dictionary containing the fitness history statistics.
+    """
     generations = range(len(summaries['best_fitness']))
-    plt.figure(figsize=(12, 6))
+    
+    plt.figure(figsize=(16, 8))
 
-    plt.subplot(1, 3, 1)
+    plt.subplot(2, 2, 1)
     plt.plot(generations, summaries['best_fitness'], label='Best Fitness')
     plt.xlabel('Generation')
     plt.ylabel('Best Fitness')
     plt.title('Best Fitness Over Generations')
+    plt.grid(True)
     plt.legend()
 
-    plt.subplot(1, 3, 2)
+    plt.subplot(2, 2, 2)
     plt.plot(generations, summaries['avg_fitness'], label='Average Fitness')
     plt.xlabel('Generation')
     plt.ylabel('Average Fitness')
     plt.title('Average Fitness Over Generations')
+    plt.grid(True)
     plt.legend()
 
-    plt.subplot(1, 3, 3)
+    plt.subplot(2, 2, 3)
     plt.plot(generations, summaries['std_fitness'], label='Standard Deviation of Fitness')
     plt.xlabel('Generation')
-    plt.ylabel('Standard Deviation of Fitness')
+    plt.ylabel('Standard Deviation')
     plt.title('Standard Deviation of Fitness Over Generations')
+    plt.grid(True)
+    plt.legend()
+
+    plt.subplot(2, 2, 4)
+    plt.plot(generations, summaries['success_rate'], label='Success Rate')
+    plt.xlabel('Generation')
+    plt.ylabel('Success Rate')
+    plt.title('Success Rate Over Generations')
+    plt.grid(True)
     plt.legend()
 
     plt.tight_layout()
+    plt.savefig('evolution_statistics.png')
     plt.show()
-
-def analyze_performance(ga, generations=50):
-    ga.evolve(generations=generations)
-    summaries = ga.get_statistical_summaries()
-    plot_statistical_summaries(summaries)
-
-    best_chromosome = max(ga.population, key=ga.fitness)
-    visualize_agent_path(ga.env)
-
-    # Print detailed output
-    print(f"Grid Size: {ga.env.size}x{ga.env.size}")
-    print(f"Pits: {len(ga.env.pits)}")
-    print(f"Wumpus: {ga.env.wumpus_pos}")
-    print(f"Gold: {ga.env.gold_pos}")
-    print(f"Agent Start: {ga.env.agent_pos}")
-    print("\nBest Evolved Chromosome:")
-    print(best_chromosome.actions)
-    print("\nOutcome:")
-
-    # Simulate the best chromosome to determine the outcome
-    ga.env.reset()
-    gold_collected = False
-    wumpus_killed = False
-    agent_survived = True
-
-    for action in best_chromosome.actions:
-        result = ga.env.move_agent(action)
-        if result == 'gold':
-            gold_collected = True
-        if 'W' in ga.env.grid[ga.env.agent_pos[0]][ga.env.agent_pos[1]]:
-            wumpus_killed = True
-        if 'P' in ga.env.grid[ga.env.agent_pos[0]][ga.env.agent_pos[1]]:
-            agent_survived = False
-            break
-
-    if gold_collected:
-        print("✔️ Gold Collected")
-    else:
-        print("❌ Gold Not Collected")
-
-    if wumpus_killed:
-        print("✔️ Wumpus Killed")
-    else:
-        print("❌ Wumpus Not Killed")
-
-    if agent_survived:
-        print("✔️ Agent Survived")
-    else:
-        print("❌ Agent Did Not Survive")
-
-    print(f"🎯 Total Fitness: {ga.fitness(best_chromosome)}")
-
-def parameter_optimization_experiments(grid_sizes, pop_sizes, mutation_rates, selection_strategies):
-    results = []
-    for size in grid_sizes:
-        for pop_size in pop_sizes:
-            for mutation_rate in mutation_rates:
-                for strategy in selection_strategies:
-                    world = WumpusWorld(size=size)
-                    ga = GeneticAlgorithm(world, pop_size=pop_size, mutation_rate=mutation_rate, selection_strategy=strategy)
-                    ga.evolve(generations=50)
-                    summaries = ga.get_statistical_summaries()
-                    results.append({
-                        'grid_size': size,
-                        'pop_size': pop_size,
-                        'mutation_rate': mutation_rate,
-                        'selection_strategy': strategy,
-                        'best_fitness': summaries['best_fitness'][-1],
-                        'avg_fitness': summaries['avg_fitness'][-1],
-                        'std_fitness': summaries['std_fitness'][-1]
-                    })
-    return results
-
-def plot_parameter_optimization_results(results):
-    for key in ['best_fitness', 'avg_fitness', 'std_fitness']:
-        plt.figure(figsize=(12, 6))
-        for strategy in set(result['selection_strategy'] for result in results):
-            strategy_results = [result for result in results if result['selection_strategy'] == strategy]
-            plt.plot([result['grid_size'] for result in strategy_results],
-                     [result[key] for result in strategy_results],
-                     label=f'{strategy}')
-        plt.xlabel('Grid Size')
-        plt.ylabel(key.replace('_', ' ').title())
-        plt.title(f'{key.replace("_", " ").title()} Over Different Grid Sizes')
-        plt.legend()
-        plt.show()
